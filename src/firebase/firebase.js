@@ -5,13 +5,12 @@ import "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDKTuf1Gc5Z3NRo2uBPxGNaJkUx3G4ax94",
-  authDomain: "snap-message-sm.firebaseapp.com",
-  projectId: "snap-message-sm",
-  storageBucket: "snap-message-sm.appspot.com",
-  messagingSenderId: "189988510901",
-  appId: "1:189988510901:web:81c9ba2b53fffd473ff2fc",
-  measurementId: "G-ZSQ2E97QGP",
+  apiKey: "AIzaSyCnwrKF_lj4WVDGV_M1w1dJNHVE1YtJRCo",
+  authDomain: "msnap-message.firebaseapp.com",
+  projectId: "msnap-message",
+  storageBucket: "msnap-message.appspot.com",
+  messagingSenderId: "775542088416",
+  appId: "1:775542088416:web:6b4a2c4f3cc1777dfa2685",
 };
 
 const app = initializeApp(firebaseConfig);
