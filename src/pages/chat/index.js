@@ -1,23 +1,12 @@
 import firebase from "@NextAlias/firebase/firebase";
 import { signOut } from "firebase/auth";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import ChatLayout from "./layout";
 
 const Chat = () => {
-  const router = useRouter();
-  const [user] = useAuthState(firebase.auth);
-
-  useEffect(() => {
-    if (!user) {
-      router.push("/");
-    }
-  }, [user, router]);
   return (
-    <div>
-      <h1>this is chat</h1>
-      <button onClick={() => signOut(firebase.auth)}>logout</button>
+    <div className="flex flex-col h-screen justify-center items-center">
+      <h1 className="text-xl font-bold">Select a chat or start a new conversation</h1>
+      <button className="uppercase mt-3 px-3 py-2 bg-red-600 rounded font-bold" onClick={() => signOut(firebase.auth)}>logout</button>
     </div>
   );
 };

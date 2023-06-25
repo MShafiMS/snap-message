@@ -10,7 +10,7 @@ import Reset from "./Reset";
 const Auth = () => {
   const [isMethod, setIsMethod] = useState("login");
   const [isHidden, setIsHidden] = useState(false);
-  const [user] = useAuthState(firebase.auth);
+  const [user, loading] = useAuthState(firebase.auth);
   const router = useRouter();
 
   useEffect(() => {
@@ -18,6 +18,9 @@ const Auth = () => {
       router.push("/chat");
     }
   }, [user, router]);
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div
