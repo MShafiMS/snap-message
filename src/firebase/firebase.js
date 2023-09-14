@@ -5,12 +5,13 @@ import "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCnwrKF_lj4WVDGV_M1w1dJNHVE1YtJRCo",
-  authDomain: "msnap-message.firebaseapp.com",
-  projectId: "msnap-message",
-  storageBucket: "msnap-message.appspot.com",
-  messagingSenderId: "775542088416",
-  appId: "1:775542088416:web:6b4a2c4f3cc1777dfa2685",
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_MESSEGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
