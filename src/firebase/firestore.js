@@ -62,7 +62,10 @@ export const getUserById = async (userId) => {
     const userSnapshot = await getDoc(userRef);
 
     if (userSnapshot.exists()) {
-      const userData = userSnapshot.data();
+      const userData = {
+        ...userSnapshot.data(),
+        createdAt: userSnapshot.data().createdAt.toMillis(),
+      };
       return userData;
     } else {
       console.log("User not found");
@@ -248,39 +251,42 @@ export const getChatmateList = async () => {
 
 export const getMessages = async (conversationId, setMessages) => {
   try {
-    const messagesRef = collection(
-      firebase.db,
-      "conversations",
-      conversationId,
-      "messages"
-    );
+    if (conversationId) {
+      const messagesRef = collection(
+        firebase.db,
+        "conversations",
+        conversationId,
+        "messages"
+      );
 
-    const messagesQuery = query(messagesRef, orderBy("timestamp"));
+      const messagesQuery = query(messagesRef, orderBy("timestamp"));
 
-    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const newMessages = [];
-      snapshot.forEach((doc) => {
-        const messageData = doc.data();
-        const { sender, recipient, content, timestamp } = messageData;
+      const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+        const newMessages = [];
+        snapshot.forEach((doc) => {
+          const messageData = doc.data();
+          const { sender, recipient, content, timestamp } = messageData;
 
-        const timestampMillis = timestamp ? timestamp.toMillis() : null;
+          const timestampMillis = timestamp ? timestamp.toMillis() : null;
 
-        const message = {
-          id: doc.id,
-          sender,
-          recipient,
-          content,
-          timestamp: timestampMillis,
-        };
+          const message = {
+            id: doc.id,
+            sender,
+            recipient,
+            content,
+            timestamp: timestampMillis,
+          };
 
-        newMessages.push(message);
+          newMessages.push(message);
+        });
+        setMessages(newMessages);
       });
-      setMessages(newMessages);
-    });
-
-    return () => {
-      unsubscribe();
-    };
+      return () => {
+        unsubscribe();
+      };
+    } else {
+      setMessages(null);
+    }
   } catch (error) {
     console.error("Error fetching messages:", error);
     throw error;
