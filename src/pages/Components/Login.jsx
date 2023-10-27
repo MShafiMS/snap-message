@@ -1,4 +1,4 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { useState } from "react";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";

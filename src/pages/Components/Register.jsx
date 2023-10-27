@@ -1,4 +1,4 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { addUser } from "@NextAlias/firebase/firestore";
 import { useState } from "react";
 import {

@@ -1,4 +1,4 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { addUser } from "@NextAlias/firebase/firestore";
 import { useSignInWithGoogle } from "react-firebase-hooks/auth";
 import { FcGoogle } from "react-icons/fc";

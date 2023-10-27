@@ -1,4 +1,4 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { FaUserAlt } from "react-icons/fa";

@@ -1,10 +1,10 @@
-import firebase from "@NextAlias/firebase/firebase";
 import {
   addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   orderBy,
   query,
   serverTimestamp,
@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { v4 as uuidv4 } from "uuid";
+import { firebase } from "./firebase";
 
 export const useUsers = () => {
   const usersRef = collection(firebase.db, "users");
@@ -245,36 +246,41 @@ export const getChatmateList = async () => {
   }
 };
 
-export const getMessages = async (conversationId) => {
+export const getMessages = async (conversationId, setMessages) => {
   try {
-    // Create a query to fetch the messages for the given conversationId
-    const messagesQuery = query(
-      collection(firebase.db, "conversations", conversationId, "messages"),
-      orderBy("timestamp")
+    const messagesRef = collection(
+      firebase.db,
+      "conversations",
+      conversationId,
+      "messages"
     );
 
-    const querySnapshot = await getDocs(messagesQuery);
+    const messagesQuery = query(messagesRef, orderBy("timestamp"));
 
-    const messages = [];
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const newMessages = [];
+      snapshot.forEach((doc) => {
+        const messageData = doc.data();
+        const { sender, recipient, content, timestamp } = messageData;
 
-    querySnapshot.forEach((doc) => {
-      const messageData = doc.data();
-      const { sender, recipient, content, timestamp } = messageData;
+        const timestampMillis = timestamp ? timestamp.toMillis() : null;
 
-      const timestampMillis = timestamp ? timestamp.toMillis() : null;
+        const message = {
+          id: doc.id,
+          sender,
+          recipient,
+          content,
+          timestamp: timestampMillis,
+        };
 
-      const message = {
-        id: doc.id,
-        sender,
-        recipient,
-        content,
-        timestamp: timestampMillis,
-      };
-
-      messages.push(message);
+        newMessages.push(message);
+      });
+      setMessages(newMessages);
     });
 
-    return messages;
+    return () => {
+      unsubscribe();
+    };
   } catch (error) {
     console.error("Error fetching messages:", error);
     throw error;

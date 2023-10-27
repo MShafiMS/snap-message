@@ -1,4 +1,4 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { signOut } from "firebase/auth";
 import Image from "next/image";
 import { useAuthState } from "react-firebase-hooks/auth";

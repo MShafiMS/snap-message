@@ -1,13 +1,11 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import {
   getConversationIdByParticipants,
   getMessages,
-  getUserById,
   sendMessage,
 } from "@NextAlias/firebase/firestore";
-import { debounce } from "lodash";
+import { collection, doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { BiSolidSend } from "react-icons/bi";
@@ -18,37 +16,14 @@ import { RiArrowRightCircleFill, RiInformationFill } from "react-icons/ri";
 import Messages from "./Messages";
 import ChatLayout from "./layout";
 
-const ChattingView = () => {
-  const { query } = useRouter();
-  const userId = query.id;
+const ChattingView = ({ userData }) => {
   const currentUser = firebase.auth.currentUser;
-  const participants = [currentUser.uid, userId];
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState(null);
   const [messages, setMessages] = useState(null);
   const [info, setInfo] = useState(false);
 
   const { handleSubmit, register, reset, watch } = useForm();
   const message = watch("message");
-
-  const fetchUserData = async () => {
-    const userData = await getUserById(userId);
-    setUserData(userData);
-  };
-
-  const fetchMessageData = async () => {
-    if (participants) {
-      const conversationId = await getConversationIdByParticipants(
-        participants
-      );
-      if (conversationId) {
-        const messages = await getMessages(conversationId);
-        setMessages(messages);
-      }
-    }
-  };
-  const dbUserData = debounce(fetchUserData, 300);
-  const dbMessageData = debounce(fetchMessageData, 300);
 
   const onSend = async () => {
     const content = { media: false, message: message };
@@ -58,12 +33,21 @@ const ChattingView = () => {
 
   useEffect(() => {
     const fetchUserAndMessage = async () => {
-      await dbUserData();
-      await dbMessageData();
+      const participants = [currentUser.uid, userData?.userId];
+      if (participants) {
+        const conversationId = await getConversationIdByParticipants(
+          participants
+        );
+        if (conversationId) {
+          await getMessages(conversationId, setMessages);
+        }
+      }
       setLoading(false);
     };
-    fetchUserAndMessage();
-  }, [participants, userId]);
+    return () => {
+      fetchUserAndMessage();
+    };
+  }, [currentUser.uid, userData?.userId]);
 
   if (loading) {
     return (
@@ -162,5 +146,38 @@ const ChattingView = () => {
     </div>
   );
 };
+
+export async function getServerSideProps({ query }) {
+  try {
+    const userId = query.id;
+
+    const userDocRef = doc(collection(firebase.db, "users"), userId);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      const userData = {
+        ...userDoc.data(),
+        createdAt: userDoc.data().createdAt.toMillis(),
+      };
+      return {
+        props: {
+          userData,
+        },
+      };
+    } else {
+      return {
+        notFound: true,
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return {
+      props: {
+        userData: null,
+      },
+    };
+  }
+}
+
 ChattingView.PageLayout = ChatLayout;
 export default ChattingView;

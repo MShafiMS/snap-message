@@ -1,4 +1,4 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { addFriend } from "@NextAlias/firebase/firestore";
 import Image from "next/image";
 import { useState } from "react";

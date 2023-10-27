@@ -1,4 +1,4 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { useState } from "react";
 import { useSendPasswordResetEmail } from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";
@@ -11,8 +11,9 @@ const Reset = ({ setIsMethod }) => {
     register,
     formState: { errors },
   } = useForm();
-  const [sendPasswordResetEmail, sending, error] =
-    useSendPasswordResetEmail(firebase.auth);
+  const [sendPasswordResetEmail, sending, error] = useSendPasswordResetEmail(
+    firebase.auth
+  );
   const onSubmit = (data) => {
     sendPasswordResetEmail(data.email).then((response) => {
       if (response) {

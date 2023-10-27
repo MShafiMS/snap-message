@@ -1,7 +1,8 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { ImSpinner9 } from "react-icons/im";
 import Login from "./Login";
 import Logo from "./Logo";
 import Register from "./Register";
@@ -19,7 +20,12 @@ const Auth = () => {
     }
   }, [user, router]);
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="bg-[#1B2348] text-white h-screen flex flex-col gap-8 items-center justify-center">
+        <Logo className="w-80 animate-pulse" fill={"#FFFFFF"} />
+        <ImSpinner9 className="text-6xl animate-spin mx-auto" />
+      </div>
+    );
   }
 
   return (

@@ -1,6 +1,5 @@
-import firebase from "@NextAlias/firebase/firebase";
+import { firebase } from "@NextAlias/firebase/firebase";
 import { getAllFriends, getChatmateList } from "@NextAlias/firebase/firestore";
-import { debounce } from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -24,33 +23,24 @@ const ChatLayout = ({ children }) => {
   const router = useRouter();
   const { query } = useRouter();
 
-  const fetchChatmateList = async () => {
-    const chatmateList = await getChatmateList();
-    setChatmateList(chatmateList);
-  };
-
-  const fetchFriendsAndNonFriends = async () => {
-    if (user) {
-      const { friendUsers, nonFriendUsers } = await getAllFriends(user?.uid);
-      setFriends(friendUsers);
-      setNonFriends(nonFriendUsers);
-    }
-  };
-
-  const dbChatMateList = debounce(fetchChatmateList, 300);
-  const dbFriendsAndNonFriends = debounce(fetchFriendsAndNonFriends, 300);
-
   const filteredFriends = friends?.filter((item1) => {
     return !chatmateList?.some((item2) => item1.userId === item2.userId);
   });
 
   useEffect(() => {
     const fetchUsers = async () => {
-      await dbChatMateList();
-      await dbFriendsAndNonFriends();
+      if (user) {
+        const chatmateList = await getChatmateList();
+        const { friendUsers, nonFriendUsers } = await getAllFriends(user?.uid);
+        setChatmateList(chatmateList);
+        setFriends(friendUsers);
+        setNonFriends(nonFriendUsers);
+      }
     };
-    fetchUsers();
-  }, [dbChatMateList, dbFriendsAndNonFriends]);
+    if (!chatmateList || !friends || !nonFriends) {
+      fetchUsers();
+    }
+  }, [chatmateList, friends, nonFriends, user]);
 
   useEffect(() => {
     if (chatmateList && friends && nonFriends && loading) {
