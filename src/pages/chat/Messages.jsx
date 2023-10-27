@@ -1,6 +1,7 @@
 import { firebase } from "@NextAlias/firebase/firebase";
+import { getMessages } from "@NextAlias/firebase/firestore";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaUserAlt } from "react-icons/fa";
 
 const Message = ({ message, userData }) => {
@@ -65,8 +66,17 @@ const Message = ({ message, userData }) => {
   );
 };
 
-const Messages = ({ messages, userData }) => {
+const Messages = ({ conversationId, userData }) => {
   const messageContainerRef = useRef(null);
+  const [messages, setMessages] = useState();
+
+  useEffect(() => {
+    if (conversationId) {
+      (async () => {
+        await getMessages(conversationId, setMessages);
+      })();
+    }
+  }, [conversationId]);
   useEffect(() => {
     messageContainerRef.current.scrollTop =
       messageContainerRef.current.scrollHeight;

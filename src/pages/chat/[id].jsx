@@ -1,9 +1,8 @@
 import { firebase } from "@NextAlias/firebase/firebase";
 import {
   getConversationIdByParticipants,
-  getMessages,
   getUserById,
-  sendMessage,
+  sendMessage
 } from "@NextAlias/firebase/firestore";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -23,7 +22,7 @@ const ChattingView = () => {
 
   const currentUser = firebase.auth.currentUser;
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState(null);
+  const [conversationId, setConversationId] = useState(null);
   const [userData, setUserData] = useState(null);
   const [info, setInfo] = useState(false);
 
@@ -32,39 +31,31 @@ const ChattingView = () => {
 
   const onSend = async () => {
     const content = { media: false, message: message };
-    await sendMessage(currentUser.uid, chatMateId, content);
     reset();
+    await sendMessage(currentUser.uid, chatMateId, content);
+    // reset();
   };
-
-  useEffect(() => {
-    const unsubscribe = async () => {
-      const participants = [currentUser.uid, chatMateId];
-      if (participants.length === 2) {
-        setLoading(true);
-        const conversationId = await getConversationIdByParticipants(
-          participants
-        );
-        await getMessages(conversationId, setMessages);
-        setLoading(false);
-      }
-    };
-    if (!userData || userData.userId !== chatMateId) {
-      unsubscribe();
-    }
-  }, [currentUser, chatMateId, userData]);
 
   useEffect(() => {
     const fetChatMate = async () => {
       setLoading(true);
       const user = await getUserById(chatMateId);
-      setUserData(user);
+      if (user) {
+        setUserData(user);
+        const participants = [currentUser.uid, user.userId];
+        if (participants.length === 2) {
+          const conversationId = await getConversationIdByParticipants(
+            participants
+          );
+          setConversationId(conversationId);
+        }
+      }
       setLoading(false);
     };
     if (!userData || userData.userId !== chatMateId) {
       fetChatMate();
     }
-  }, [chatMateId, userData]);
-
+  }, [chatMateId, currentUser.uid, userData]);
 
   if (loading) {
     return (
@@ -104,7 +95,7 @@ const ChattingView = () => {
           </div>
         </div>
         <div className="w-full h-full relative">
-          <Messages messages={messages} userData={userData} />
+          <Messages conversationId={conversationId} userData={userData} />
         </div>
         <form
           onSubmit={handleSubmit(onSend)}
