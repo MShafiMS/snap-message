@@ -5,7 +5,6 @@ import { FaUserAlt } from "react-icons/fa";
 
 const Friends = ({friends}) => {
   const { query } = useRouter();
-
   return (
     <div className="flex flex-col gap-2 mt-8">
       {friends?.map((user, idx) => (

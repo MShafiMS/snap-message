@@ -13,15 +13,14 @@ import Friends from "./Friends";
 import Menu from "./Menu";
 
 const ChatLayout = ({ children }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const [isMenu, setIsMenu] = useState(false);
   const [friends, setFriends] = useState(null);
   const [chatmateList, setChatmateList] = useState(null);
   const [nonFriends, setNonFriends] = useState(null);
   const [user] = useAuthState(firebase.auth);
-  const router = useRouter();
-  const { query } = useRouter();
+  const { query, push } = useRouter();
 
   const filteredFriends = friends?.filter((item1) => {
     return !chatmateList?.some((item2) => item1.userId === item2.userId);
@@ -30,29 +29,20 @@ const ChatLayout = ({ children }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       if (user) {
-        const chatmateList = await getChatmateList();
-        const { friendUsers, nonFriendUsers } = await getAllFriends(user?.uid);
-        setChatmateList(chatmateList);
-        setFriends(friendUsers);
-        setNonFriends(nonFriendUsers);
+        setLoading(true);
+        await getChatmateList(setChatmateList);
+        await getAllFriends(setFriends, setNonFriends);
+        setLoading(false);
       }
     };
-    if (!chatmateList || !friends || !nonFriends) {
-      fetchUsers();
-    }
-  }, [chatmateList, friends, nonFriends, user]);
-
-  useEffect(() => {
-    if (chatmateList && friends && nonFriends && loading) {
-      setLoading(false);
-    }
-  }, [chatmateList, friends, nonFriends, loading]);
+    fetchUsers();
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
-      router.push("/");
+      push("/");
     }
-  }, [user, router]);
+  }, [user, push]);
 
   if (loading) {
     return (
@@ -130,7 +120,7 @@ const ChatLayout = ({ children }) => {
       <div
         className={`w-full lg:h-full h-screen ${
           !query?.id && "lg:block hidden"
-        } rounded-xl bg-gradient-to-bl from-[#273056] to-[#36406C]`}
+        } lg:rounded-xl bg-gradient-to-bl from-[#273056] to-[#36406C]`}
       >
         {children}
       </div>

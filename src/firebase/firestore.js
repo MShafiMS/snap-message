@@ -57,52 +57,67 @@ export const addFriend = async (userId, friendId) => {
 };
 
 export const getUserById = async (userId) => {
-  try {
-    const userRef = doc(collection(firebase.db, "users"), userId);
-    const userSnapshot = await getDoc(userRef);
+  if (userId) {
+    try {
+      const userRef = doc(collection(firebase.db, "users"), userId);
+      const userSnapshot = await getDoc(userRef);
 
-    if (userSnapshot.exists()) {
-      const userData = {
-        ...userSnapshot.data(),
-        createdAt: userSnapshot.data().createdAt.toMillis(),
-      };
-      return userData;
-    } else {
-      console.log("User not found");
-      return null;
+      if (userSnapshot.exists()) {
+        const userData = {
+          ...userSnapshot.data(),
+          createdAt: userSnapshot.data().createdAt.toMillis(),
+        };
+        return userData;
+      } else {
+        console.log("User not found");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error retrieving user:", error);
+      throw error;
     }
-  } catch (error) {
-    console.error("Error retrieving user:", error);
-    throw error;
   }
 };
 
-export const getAllFriends = async (userId) => {
-  if (userId) {
-    try {
-      const friendsCollectionRef = collection(
-        firebase.db,
-        "users",
-        userId,
-        "friends"
-      );
-      const usersRef = collection(firebase.db, "users");
-      const q = query(usersRef, where("userId", "!=", userId));
-      const usersSnapshot = await getDocs(q);
+export const getAllFriends = async (setFriendData, setNonFriendData) => {
+  const userId = firebase?.auth?.currentUser?.uid;
 
-      const friendsSnapshot = await getDocs(friendsCollectionRef);
+  try {
+    const friendsCollectionRef = collection(
+      firebase.db,
+      "users",
+      userId,
+      "friends"
+    );
+    const usersRef = collection(firebase.db, "users");
 
-      const friendIds = friendsSnapshot.docs.map((doc) => doc.id);
-      const friendUsers = [];
+    const unsubscribeFriends = onSnapshot(
+      friendsCollectionRef,
+      async (friendsSnapshot) => {
+        const friendIds = friendsSnapshot.docs.map((doc) => doc.id);
+        const friendUsers = [];
 
-      for (const friendId of friendIds) {
-        const friendData = await getUserById(friendId);
-        if (friendData) {
-          friendUsers.push(friendData);
+        for (const friendId of friendIds) {
+          const friendData = await getUserById(friendId);
+          if (friendData) {
+            friendUsers.push(friendData);
+          }
         }
+
+        // Call the provided function to update friend data
+        setFriendData(friendUsers);
       }
+    );
+
+    const q = query(usersRef, where("userId", "!=", userId));
+
+    const unsubscribeUsers = onSnapshot(q, async (usersSnapshot) => {
+      const friendIds = (await getDocs(friendsCollectionRef)).docs.map(
+        (doc) => doc.id
+      );
       const nonFriendUsers = [];
-      for (const userDoc of usersSnapshot.docs) {
+
+      usersSnapshot.forEach(async (userDoc) => {
         const userId = userDoc.id;
 
         if (!friendIds.includes(userId)) {
@@ -114,12 +129,20 @@ export const getAllFriends = async (userId) => {
             nonFriendUsers.push(userData);
           }
         }
-      }
-      return { friendUsers, nonFriendUsers };
-    } catch (error) {
-      console.error("Error getting friend details:", error);
-      throw error;
-    }
+      });
+
+      // Call the provided function to update non-friend data
+      setNonFriendData(nonFriendUsers);
+    });
+
+    return () => {
+      // Unsubscribe from real-time updates when needed (e.g., component unmounts)
+      unsubscribeFriends();
+      unsubscribeUsers();
+    };
+  } catch (error) {
+    console.error("Error getting friend details:", error);
+    throw error;
   }
 };
 
@@ -205,7 +228,7 @@ export const sendMessage = async (sender, recipient, content) => {
   }
 };
 
-export const getChatmateList = async () => {
+export const getChatmateList = async (setChatmateList) => {
   const currentUserId = firebase?.auth?.currentUser?.uid;
   if (currentUserId) {
     try {
@@ -214,34 +237,38 @@ export const getChatmateList = async () => {
         where("participants", "array-contains", currentUserId)
       );
 
-      const querySnapshot = await getDocs(conversationsQuery);
+      const unsubscribe = onSnapshot(conversationsQuery, (querySnapshot) => {
+        const chatmateList = [];
 
-      const chatmateList = [];
+        querySnapshot.forEach(async (doc) => {
+          const conversationData = doc.data();
+          const { participants, updatedAt } = conversationData;
 
-      for (const doc of querySnapshot.docs) {
-        const conversationData = doc.data();
-        const { participants, updatedAt } = conversationData;
+          const chatmateId = participants
+            .sort()
+            .find((participant) => participant !== currentUserId);
 
-        const chatmateId = participants
-          .sort()
-          .find((participant) => participant !== currentUserId);
+          const chatmateDetails = await getUserById(chatmateId);
 
-        const chatmateDetails = await getUserById(chatmateId);
+          const timestampMillis = updatedAt ? updatedAt.toMillis() : null;
 
-        const timestampMillis = updatedAt ? updatedAt.toMillis() : null;
+          const chatmate = {
+            id: chatmateId,
+            updatedAt: timestampMillis,
+            ...chatmateDetails,
+          };
 
-        const chatmate = {
-          id: chatmateId,
-          updatedAt: timestampMillis,
-          ...chatmateDetails,
-        };
+          chatmateList.push(chatmate);
+        });
 
-        chatmateList.push(chatmate);
-      }
+        chatmateList.sort((a, b) => b.updatedAt - a.updatedAt);
 
-      chatmateList.sort((a, b) => b.updatedAt - a.updatedAt);
+        setChatmateList(chatmateList);
+      });
 
-      return chatmateList;
+      return () => {
+        unsubscribe();
+      };
     } catch (error) {
       console.error("Error fetching chatmate list:", error);
       throw error;

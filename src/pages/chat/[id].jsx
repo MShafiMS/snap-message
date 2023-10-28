@@ -2,14 +2,16 @@ import { firebase } from "@NextAlias/firebase/firebase";
 import {
   getConversationIdByParticipants,
   getUserById,
-  sendMessage
+  sendMessage,
 } from "@NextAlias/firebase/firestore";
+import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { BiSolidSend } from "react-icons/bi";
-import { BsEmojiSmile, BsImages } from "react-icons/bs";
+import { BiArrowBack, BiSolidSend } from "react-icons/bi";
+import { BsImages } from "react-icons/bs";
 import { FaUserAlt } from "react-icons/fa";
 import { ImSpinner9 } from "react-icons/im";
 import { RiArrowRightCircleFill, RiInformationFill } from "react-icons/ri";
@@ -25,6 +27,7 @@ const ChattingView = () => {
   const [conversationId, setConversationId] = useState(null);
   const [userData, setUserData] = useState(null);
   const [info, setInfo] = useState(false);
+  const [focus, setFocus] = useState(false);
 
   const { handleSubmit, register, reset, watch } = useForm();
   const message = watch("message");
@@ -33,7 +36,6 @@ const ChattingView = () => {
     const content = { media: false, message: message };
     reset();
     await sendMessage(currentUser.uid, chatMateId, content);
-    // reset();
   };
 
   useEffect(() => {
@@ -55,7 +57,7 @@ const ChattingView = () => {
     if (!userData || userData.userId !== chatMateId) {
       fetChatMate();
     }
-  }, [chatMateId, currentUser.uid, userData]);
+  }, [chatMateId, currentUser?.uid, userData]);
 
   if (loading) {
     return (
@@ -67,14 +69,20 @@ const ChattingView = () => {
 
   return (
     <div className="flex h-full">
+      <Head>
+        <title>{userData?.name || "Message"}</title>
+      </Head>
       <div className="w-full flex flex-col h-full">
-        <div className="mx-2 px-8 py-4 border-b border-white/10 flex items-center justify-between">
+        <div className="mx-2 md:px-8 px-2 py-4 border-b border-white/10 flex items-center justify-between">
           <div className="flex gap-3 items-center">
+            <Link href={"/chat"} className="text-2xl lg:hidden">
+              <BiArrowBack />
+            </Link>
             {userData?.profilePic ? (
               <Image
                 src={userData?.profilePic}
-                width={60}
-                height={60}
+                width={50}
+                height={50}
                 className="rounded-full"
                 alt="profile"
               />
@@ -108,30 +116,34 @@ const ChattingView = () => {
             <input
               type="text"
               {...register("message")}
+              onFocus={setFocus}
+              onBlur={() => setFocus(false)}
               placeholder="Type your message here..."
               required
               className="w-11/12 bg-white/0 outline-none px-3 text-lg py-3"
             />
-            <button
-              type="button"
-              className="absolute top-1/2 -translate-y-1/2 right-3"
-            >
-              <BsEmojiSmile size={25} />
-            </button>
+            {(message?.length || focus) && (
+              <button
+                disabled={!message?.length}
+                type="submit"
+                className={`${
+                  message?.length && "bg-green-700 shadow"
+                } p-2 rounded absolute top-1/2 -translate-y-1/2 right-2`}
+              >
+                <BiSolidSend size={20} />
+              </button>
+            )}
           </div>
-          <button
-            disabled={!message?.length}
-            type="submit"
-            className={`${
-              message?.length && "bg-green-700 shadow"
-            } p-2 rounded`}
-          >
-            <BiSolidSend size={20} />
-          </button>
         </form>
       </div>
       {info && (
-        <div className="w-5/12 border-l border-white/10">
+        <div className="lg:w-5/12 lg:relative lg:bg-inherit absolute bg-[#272F56] h-full w-full border-l border-white/10">
+          <button
+            onClick={() => setInfo(false)}
+            className="text-2xl text-blue-500 p-2.5 bg-white/5 lg:hidden"
+          >
+            <BiArrowBack />
+          </button>
           <div className="flex flex-col mt-10 items-center">
             {userData?.profilePic ? (
               <Image

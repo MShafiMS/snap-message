@@ -4,7 +4,7 @@ import ChatLayout from "./layout";
 
 const Chat = () => {
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
+    <div className="flex w-full h-full flex-col justify-center items-center">
       <h1 className="text-xl font-bold">
         Select a chat or start a new conversation
       </h1>

@@ -1,5 +1,6 @@
 import { firebase } from "@NextAlias/firebase/firebase";
 import { getMessages } from "@NextAlias/firebase/firestore";
+import { renderClickableLinks } from "@NextAlias/utils";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FaUserAlt } from "react-icons/fa";
@@ -26,7 +27,9 @@ const Message = ({ message, userData }) => {
             : "bg-white/10 rounded-bl-none"
         }`}
       >
-        <h1 className="p-2 pb-1">{message?.content.message}</h1>
+        <h1 className="p-2 pb-1">
+        {renderClickableLinks(message?.content.message)}
+        </h1>
         <p className="text-end text-xs pr-1 text-white/70">{formattedTime}</p>
       </div>
       {message?.sender === currentUser?.uid ? (
@@ -78,9 +81,11 @@ const Messages = ({ conversationId, userData }) => {
     }
   }, [conversationId]);
   useEffect(() => {
-    messageContainerRef.current.scrollTop =
-      messageContainerRef.current.scrollHeight;
-  }, []);
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
   return (
     <div
       ref={messageContainerRef}
