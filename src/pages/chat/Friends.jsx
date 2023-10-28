@@ -33,7 +33,7 @@ const Friends = ({ friends }) => {
           </div>
         </Link>
       ))}
-      {!friends.length && (
+      {!friends?.length && (
         <div className="h-[80%] flex items-center justify-center">
           <p>Nothing Found</p>
         </div>

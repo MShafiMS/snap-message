@@ -71,7 +71,7 @@ const Connect = ({ nonFriends }) => {
             </div>
           ))
         : null}
-        {!searched.length && <div className="h-96 flex items-center justify-center">
+        {!searched?.length && <div className="h-96 flex items-center justify-center">
         <p>Nothing Found</p></div>}
     </div>
   );
