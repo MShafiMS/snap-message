@@ -21,13 +21,13 @@ const Message = ({ message, userData }) => {
       }`}
     >
       <div
-        className={`w-fit max-w-[80%] rounded-xl px-1 ${
+        className={`w-fit lg:max-w-[35vw] max-w-[73vw] rounded-xl px-1 ${
           message?.sender === currentUser?.uid
             ? "bg-blue-500 rounded-br-none"
             : "bg-white/10 rounded-bl-none"
         }`}
       >
-        <p className="p-2 pb-1 break-all">
+        <p className="p-2 pb-1 break-all lg:max-w-[35vw] max-w-[73vw]">
         {renderClickableLinks(message?.content.message)}
         </p>
         <p className="text-end text-xs pr-1 text-white/70">{formattedTime}</p>
