@@ -2,6 +2,7 @@ import { firebase } from "@NextAlias/firebase/firebase";
 import { signOut } from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { BiLogOutCircle } from "react-icons/bi";
 import { FaUserAlt } from "react-icons/fa";
@@ -9,8 +10,9 @@ import { RiUserSearchLine } from "react-icons/ri";
 
 const Menu = ({ clickFriend }) => {
   const [user] = useAuthState(firebase.auth);
+  const { push } = useRouter();
   return (
-    <div className="flex flex-col justify-between h-[90vh]">
+    <div className="flex px-2 flex-col justify-between h-[90vh]">
       <div className="flex flex-col items-center mt-8">
         {user?.photoURL ? (
           <Image
@@ -34,15 +36,22 @@ const Menu = ({ clickFriend }) => {
           <RiUserSearchLine className="text-xl" /> Connect With Friends
         </button>
         <button
-          onClick={() => signOut(firebase.auth)}
+          onClick={async () => {
+            await signOut(firebase.auth);
+            push("/");
+          }}
           className="flex items-center gap-3 justify-center uppercase bg-white/10 w-full my-2 py-3 bg-red-500 rounded"
         >
           <BiLogOutCircle className="text-xl" /> Logout
         </button>
       </div>
-      <p className="flex items-center gap-3 justify-center bg-white/10 w-full my-2 py-2 bg-blue-600 rounded text-sm uppercase">
+      <p className="text-center text-xs mb-1 font-light uppercase">
         Developed By{" "}
-        <Link href="https://ms-muhammadshafi.web.app/" target="_blank" className="font-bold hover:underline">
+        <Link
+          href="https://ms-muhammadshafi.web.app/"
+          target="_blank"
+          className="font-medium hover:underline"
+        >
           Muhammad Shafi
         </Link>
       </p>

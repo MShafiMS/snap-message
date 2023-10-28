@@ -21,15 +21,15 @@ const Message = ({ message, userData }) => {
       }`}
     >
       <div
-        className={`w-fit rounded-xl px-1 ${
+        className={`w-fit max-w-[80%] rounded-xl px-1 ${
           message?.sender === currentUser?.uid
             ? "bg-blue-500 rounded-br-none"
             : "bg-white/10 rounded-bl-none"
         }`}
       >
-        <h1 className="p-2 pb-1">
+        <p className="p-2 pb-1 break-all">
         {renderClickableLinks(message?.content.message)}
-        </h1>
+        </p>
         <p className="text-end text-xs pr-1 text-white/70">{formattedTime}</p>
       </div>
       {message?.sender === currentUser?.uid ? (

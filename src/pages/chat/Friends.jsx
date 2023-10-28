@@ -3,15 +3,17 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FaUserAlt } from "react-icons/fa";
 
-const Friends = ({friends}) => {
+const Friends = ({ friends }) => {
   const { query } = useRouter();
   return (
-    <div className="flex flex-col gap-2 mt-8">
+    <>
       {friends?.map((user, idx) => (
         <Link
           href={`/chat/${user.userId}`}
           key={idx}
-          className={`${query.id === user.userId ? "bg-[#4967be]" : "bg-white/10"} p-3 gap-2 rounded flex justify-between items-center`}
+          className={`${
+            query.id === user.userId ? "bg-[#4967be]" : "hover:bg-white/10"
+          } duration-100 p-3 gap-2 rounded-lg flex justify-between items-center`}
         >
           <div className="flex gap-2 items-center justify-center">
             {user?.profilePic ? (
@@ -31,7 +33,12 @@ const Friends = ({friends}) => {
           </div>
         </Link>
       ))}
-    </div>
+      {!friends.length && (
+        <div className="h-[80%] flex items-center justify-center">
+          <p>Nothing Found</p>
+        </div>
+      )}
+    </>
   );
 };
 

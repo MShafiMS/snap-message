@@ -57,9 +57,9 @@ const ChatLayout = ({ children }) => {
       <div
         className={`lg:w-4/12 ${
           query?.id && "lg:block hidden"
-        } overflow-y-auto lg:mr-4 p-2 lg:rounded-xl lg:bg-gradient-to-b from-[#272F56] to-[#272F56]/80`}
+        } lg:mr-4 py-2 lg:rounded-xl lg:bg-gradient-to-b from-[#272F56] to-[#272F56]/80`}
       >
-        <div className="flex gap-5 mx-1 mt-2">
+        <div className="flex gap-5 px-2 mx-1 mt-2">
           {isFriend || isMenu ? (
             <button
               onClick={() => {
@@ -111,9 +111,22 @@ const ChatLayout = ({ children }) => {
           </>
         ) : (
           <>
-            {chatmateList && filteredFriends && (
-              <Friends friends={[...chatmateList, ...filteredFriends]} />
-            )}
+            <div className="flex flex-col overflow-y-auto lg:h-[calc(100vh-11rem)] lg:max-h-[calc(100vh-11rem)] h-[calc(100vh-9.2rem)] max-h-[calc(100vh-9.2rem)] gap-2 px-2 mt-8">
+              {chatmateList && filteredFriends && (
+                <Friends friends={[...chatmateList, ...filteredFriends]} />
+              )}
+            </div>
+            <div className="px-2 py-2">
+              <button
+                onClick={() => {
+                  setIsMenu(false);
+                  setIsFriend(true);
+                }}
+                className="flex items-center gap-3 justify-center uppercase hover:bg-white/10 duration-100 w-full py-2 rounded-xl"
+              >
+                <RiUserSearchLine className="text-xl" /> Connect With Friends
+              </button>
+            </div>
           </>
         )}
       </div>

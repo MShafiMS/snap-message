@@ -21,9 +21,9 @@ const Connect = ({ nonFriends }) => {
     await addFriend(currentUser.uid, friendId);
     setIsLoading("");
   };
-  
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col px-2 gap-3">
       <div>
         <input
           onChange={(e) => setSearch(e.target.value)}
@@ -34,7 +34,7 @@ const Connect = ({ nonFriends }) => {
         />
       </div>
       {search.length
-        ? searched?.map((user, idx) => (
+        ? searched.slice(0, 7)?.map((user, idx) => (
             <div
               key={idx}
               className="bg-white/20 p-2 gap-2 rounded flex justify-between items-center"
@@ -71,6 +71,8 @@ const Connect = ({ nonFriends }) => {
             </div>
           ))
         : null}
+        {!searched.length && <div className="h-96 flex items-center justify-center">
+        <p>Nothing Found</p></div>}
     </div>
   );
 };
